@@ -31,6 +31,10 @@ invlogit = function(x) {
 #' @param K the within-China air travel matrix, \eqn{n \times n}
 #' @param W the international air travel matrix, \eqn{n \times m}
 #' @param sim_fun a function which returns a simulation from a disease model
+#' @param phi_mask a vector of 0s and 1s determining which cities in China to apply the
+#'     underreporting parameter \eqn{phi} to.
+#' @param agg_up_to aggregate the first however many case detection records, allowing for
+#'     a delay in receiving counts from the first few cases.
 #'
 #' @details This function returns a closure -- another function that encapsulates the
 #' data passed to the containing function.  See the return value for the function signature.
@@ -44,12 +48,12 @@ invlogit = function(x) {
 #'
 #' @export
 #' @import assertthat
-LogLikelihood = function(y, z, N, K, W, sim_fun, agg_up_to=11) {
+LogLikelihood = function(y, z, N, K, W, sim_fun,
+                         phi_mask=(rownames(K)=='Wuhan'), agg_up_to=11) {
 
   # Transpose both y and z for consistency with ODE output
   y = t(y)
   z = t(z)
-  wuhan_idx = rownames(K)=='Wuhan'
 
   # Calculates the log likelihood
   #
@@ -63,27 +67,29 @@ LogLikelihood = function(y, z, N, K, W, sim_fun, agg_up_to=11) {
     sim_param = exp(param[1:3])
 
     if(isTRUE(visualise)) {
-      pparam = c(beta=exp(param[1]), gamma=exp(param[2]), I0W=exp(param[3]), phi=invlogit(param[4]))
+      pparam = c(beta=exp(param[1]), gamma=exp(param[2]),
+                 I0W=exp(param[3]), phi=invlogit(param[4]))
       print(pparam)
     }
 
     expected = sim_fun(sim_param)
     p_detect = rep(1, length(N))
-    p_detect[wuhan_idx] = invlogit(param[4]) # phi, underreporting
+    p_detect[phi_mask] = invlogit(param[4]) # phi, underreporting
 
     # Observe increments in R in China
     exp_incr = t(t(diff(expected$R)) * p_detect)
 
     # China observation model
     y_prime = y[agg_up_to:nrow(y),]
-    exp_incr_prime = rbind(colSums(exp_incr[1:agg_up_to,]), exp_incr[(agg_up_to+1):nrow(exp_incr),])
+    exp_incr_prime = rbind(colSums(exp_incr[1:agg_up_to,]),
+                           exp_incr[(agg_up_to+1):nrow(exp_incr),])
     assertthat::assert_that(all(dim(y_prime)==dim(exp_incr_prime)))
     llik_china = dpois(y_prime, exp_incr_prime, log=TRUE)
     llik_china = sum(llik_china)
 
     if (isTRUE(visualise)) {
-      plot(cumsum(y_prime[,wuhan_idx]))
-      lines(cumsum(exp_incr_prime[, wuhan_idx]), col=2)
+      plot(cumsum(y_prime[, phi_mask]))
+      lines(cumsum(exp_incr_prime[, phi_mask]), col=2)
     }
 
     # Rest of world observation model
