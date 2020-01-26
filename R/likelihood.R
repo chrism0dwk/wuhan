@@ -63,8 +63,8 @@ LogLikelihood = function(y, z, N, K, W, sim_fun,
   #
   # @return the log likelihood of the data conditional on the model and parameters
   #
-  logp_fn = function(param, visualise=FALSE) {
-    sim_param = exp(param[1:3])
+  logp_fn = function(param, r=2, visualise=FALSE) {
+    sim_param = exp(param)
 
     if(isTRUE(visualise)) {
       pparam = c(beta=exp(param[1]), gamma=exp(param[2]),
@@ -84,18 +84,21 @@ LogLikelihood = function(y, z, N, K, W, sim_fun,
     exp_incr_prime = rbind(colSums(exp_incr[1:agg_up_to,]),
                            exp_incr[(agg_up_to+1):nrow(exp_incr),])
     assertthat::assert_that(all(dim(y_prime)==dim(exp_incr_prime)))
-    llik_china = dpois(y_prime, exp_incr_prime, log=TRUE)
+    llik_china = dnbinom(y_prime, size=r, mu=exp_incr_prime, log=TRUE)
     llik_china = sum(llik_china)
 
     if (isTRUE(visualise)) {
+      dev.hold()
       plot(cumsum(y_prime[, phi_mask]))
       lines(cumsum(exp_incr_prime[, phi_mask]), col=2)
+      dev.flush()
     }
 
     # Rest of world observation model
     china_prev = t(t(expected$I / N) * p_detect)
     flight_prev = china_prev %*% W
-    llik_world = sum(dpois(z, flight_prev, log=TRUE))
+    llik_world = dnbinom(z, size=r, mu=flight_prev, log=TRUE)
+    llik_world = sum(llik_world)
 
     llik_china + llik_world
   }
