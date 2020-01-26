@@ -7,11 +7,11 @@ in the rest of China via the airline network, and to the rest of the world.
 
 __Data required__: 
 
-* `y` daily case reports in all Chinese cities
-* `z` daily case reports from other countries
-* `K` daily numbers of passengers going between cities in China via airline network
-* `W` daily numbers of passengers going between Chinese cities and other countries via airline network
-* `N` the population size in each Chinese city
+* `china_cases` daily case reports in all Chinese cities
+* `world_cases` daily case reports from other countries
+* `K` daily numbers of passengers going between cities in China via airline network, available from OAG Traffic Analyzer
+* `W` daily numbers of passengers going between Chinese cities and other countries via airline network, available from OAG Traffic Analyzer
+* `china_population` the population size in each Chinese city
     
 __Parameters__:
 
@@ -29,10 +29,10 @@ To use the package, assume the following workflow in R:
 > library(wuhan)
 
 # Instantiate ODE model, simulate up to day 22.
-> simulator = NetworkODEModel(N=N, K=K, init_loc='Wuhan', alpha=1/4, max_t=22) 
+> simulator = NetworkODEModel(N=china_population, K=K, init_loc='Wuhan', alpha=1/4, max_t=22) 
 
 # Instantiate LogLikelihood function
-> llik = LogLikelihood(y=y, z=z, N=N, K=K, W=W, sim_fun=simulator)
+> llik = LogLikelihood(y=china_cases, z=world_cases, N=N, K=K, W=W, sim_fun=simulator)
 
 # Find MLEs using optimisation
 > p_hat = optim(log(par_init), llik, control=list(fnscale=-1))
