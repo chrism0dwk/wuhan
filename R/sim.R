@@ -49,11 +49,12 @@ NetworkODEModel = function(N, K, init_loc, alpha, max_t) {
 }
 
 
-NoiseGeneratingFunction = function(param, N, K, W, phi_mask=rownames(K)=='Wuhan',
+NoiseGeneratingFunction = function(param, N, K, W, phi_mask=(rownames(K)=='Wuhan'),
                                    agg_up_to = 11, max_t=22, simulator=None) {
 
   expected = simulator(param[1:3])
-  p_detect = param[4] * phi_mask
+  p_detect = rep(1, length(N))
+  p_detect[phi_mask] = param[4]
 
   # Increments on R
   exp_incr = t(t(diff(expected$R)) * p_detect)
