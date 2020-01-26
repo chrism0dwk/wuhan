@@ -50,7 +50,7 @@ NetworkODEModel = function(N, K, init_loc, alpha, max_t) {
 
 
 NoiseGeneratingFunction = function(param, N, K, W, phi_mask=rownames(K)=='Wuhan',
-                                   agg_up_to = 11, max_t=22, r=2, simulator=None) {
+                                   agg_up_to = 11, max_t=22, simulator=None) {
 
   expected = simulator(param[1:3])
   p_detect = param[4] * phi_mask
