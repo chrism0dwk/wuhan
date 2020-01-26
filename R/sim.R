@@ -47,24 +47,3 @@ NetworkODEModel = function(N, K, init_loc, alpha, max_t) {
   }
 
 }
-
-
-NoiseGeneratingFunction = function(param, N, K, W, phi_mask=rownames(K)=='Wuhan',
-                                   agg_up_to = 11, max_t=22, r=2, simulator=None) {
-
-  expected = simulator(param[1:3])
-  p_detect = param[4] * phi_mask
-
-  # Increments on R
-  exp_incr = t(t(diff(expected$R)) * p_detect)
-
-  # Noise for China
-  y_china = matrix(rnbinom(length(exp_incr), size=r, mu=unlist(exp_incr)), ncol=ncol(exp_incr))
-
-  # Noise for RoW
-  china_prev = t(t(expected$I / N) * p_detect)
-  flight_prev = china_prev %*% W
-  y_row = matrix(rnbinom(length(flight_prev), size=r, mu=unlist(flight_prev)), ncol=ncol(flight_prev))
-
-  list(y=t(y_china), z=t(y_row))
-}
