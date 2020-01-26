@@ -20,16 +20,30 @@ invlogit = function(x) {
 
 #' Likelihood function for Wuhan nCoV-2019
 #'
-#' @param y a $n \times T$ matrix of case reports in China
-#' @param z a $m \times T$ matrix of case reports elsewhere
+#' This function returns a function encoding the likelihood for the nCoV-2019
+#' model.  It assumes Poisson-distributed increments of case
+#' reports in China, and Poisson-distributed increments in numbers of
+#' infected passengers on planes elsewhere.
+#'
+#' @param y a \eqn{n \times T} matrix of case reports in China
+#' @param z a \eqn{m \times T} matrix of case reports elsewhere
 #' @param N the population sizes within China, length n
-#' @param K the within-China air travel matrix, $n \times n$
-#' @param W the international air travel matrix, $n \times m$
+#' @param K the within-China air travel matrix, \eqn{n \times n}
+#' @param W the international air travel matrix, \eqn{n \times m}
 #' @param sim_fun a function which returns a simulation from a disease model
 #'
-#' @return a function to calculate the log likelihood
+#' @details This function returns a closure -- another function that encapsulates the
+#' data passed to the containing function.  See the return value for the function signature.
+#'
+#' @return a function to calculate the log likelihood.  This function has signature
+#' \code{logp_fn(params, visualise=FALSE)} where \code{params} is a vector of parameters
+#' \code{c(beta, gamma, I0W, phi)}.  If \code{visualise} is \code{TRUE}, then parameter values
+#' are printed to the console and a graph showing how the ODE mean function matches the observed
+#' timeseries (in Wuhan) is displayed.  This is useful for tracking the progression of various
+#' optimisers.
 #'
 #' @export
+#' @import assertthat
 LogLikelihood = function(y, z, N, K, W, sim_fun, agg_up_to=11) {
 
   # Transpose both y and z for consistency with ODE output
@@ -37,22 +51,14 @@ LogLikelihood = function(y, z, N, K, W, sim_fun, agg_up_to=11) {
   z = t(z)
   wuhan_idx = rownames(K)=='Wuhan'
 
-  #' Calculates the log likelihood
-  #'
-  #' This function assumes Poisson-distributed increments of case
-  #' reports in China, and Poisson-distributed increments in numbers of
-  #' infected passengers on planes elsewhere.
-  #'
-  #' @param param a vector of model parameters c(beta, gamma, I0W, phi)
-  #' @param visualise if TRUE then print out model parameters and a graph of
-  #' modelled case detections in Wuhan.  Useful for following progress of optimisers
-  #'
-  #' @return the log likelihood of the data conditional on the model and parameters
-  #'
-  #' @export
-  #' @import assertthat
-  #' @import deSolve
-  #'
+  # Calculates the log likelihood
+  #
+  # @param param a vector of model parameters c(beta, gamma, I0W, phi)
+  # @param visualise if TRUE then print out model parameters and a graph of
+  # modelled case detections in Wuhan.  Useful for following progress of optimisers
+  #
+  # @return the log likelihood of the data conditional on the model and parameters
+  #
   logp_fn = function(param, visualise=FALSE) {
     sim_param = exp(param[1:3])
 

@@ -2,8 +2,9 @@ Package: wuhan
 Type: Package
 Title: Model simulation and fitting for Wuhan nCoV-2019
 Version: 0.1.0
-Author: Chris Jewell <c.jewell@lancaster.ac.uk>, Jon Read <jonathan.read@lancaster.ac.uk>
-Maintainer: Chris Jewell <c.jewell@lancaster.ac.uk>
+Authors@R: c(person("Jonathan", "Read", email="jonathan.read@lancaster.ac.uk", role=c("aut")),
+             person("Jessica", "Bridgen", email="j.bridgen@lancaster.ac.uk", role=c("aut")),
+             person("Chris", "Jewell", email = "c.jewell@lancaster.ac.uk", role = c("aut", "cre")))
 Description: This package implements an ODE model for the Wuhan nCoV-2019 outbreak.  It contains functions to simulate from the model, as well as an  observation process likelihood function which may be used in various optimisation methods.
 License: MIT
 Encoding: UTF-8

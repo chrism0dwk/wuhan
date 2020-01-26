@@ -5,6 +5,7 @@
 #' @param init_loc the name of the initial location
 #' @param alpha the latent period
 #' @return list of matrices containing simulated results
+#' @import deSolve
 #' @export
 NetworkODEModel = function(N, K, init_loc, alpha, max_t) {
 
@@ -36,7 +37,7 @@ NetworkODEModel = function(N, K, init_loc, alpha, max_t) {
     I0 = rep(0, length(N))
     I0[rownames(K)==init_loc] = I0W
     y = c(N-I0, rep(0, length(N)), I0, rep(0, length(N)))
-    sim = ode(y=y, times=t, func=func, parms=param)
+    sim = deSolve::ode(y=y, times=t, func=func, parms=param)
     t=sim[,1]
     S=sim[,seq(2,len=n)]
     E=sim[,seq(2+n, len=n)]
