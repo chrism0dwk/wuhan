@@ -4,7 +4,16 @@
 \alias{LogLikelihood}
 \title{Likelihood function for Wuhan nCoV-2019}
 \usage{
-LogLikelihood(y, z, N, K, W, sim_fun, agg_up_to = 11)
+LogLikelihood(
+  y,
+  z,
+  N,
+  K,
+  W,
+  sim_fun,
+  phi_mask = (rownames(K) == "Wuhan"),
+  agg_up_to = 11
+)
 }
 \arguments{
 \item{y}{a \eqn{n \times T} matrix of case reports in China}
@@ -18,6 +27,12 @@ LogLikelihood(y, z, N, K, W, sim_fun, agg_up_to = 11)
 \item{W}{the international air travel matrix, \eqn{n \times m}}
 
 \item{sim_fun}{a function which returns a simulation from a disease model}
+
+\item{phi_mask}{a vector of 0s and 1s determining which cities in China to apply the
+underreporting parameter \eqn{phi} to.}
+
+\item{agg_up_to}{aggregate the first however many case detection records, allowing for
+a delay in receiving counts from the first few cases.}
 }
 \value{
 a function to calculate the log likelihood.  This function has signature
