@@ -12,10 +12,10 @@ bootstrap = function(param_hat, K, W, alpha, max_t) {
   simulator = NetworkODEModel(china_population, K, 'Wuhan', alpha, max_t)
 
   bs = function() {
-    sim = NoiseGeneratingFunction(params_linear, china_population, K, W, simulator)
+    sim = NoiseGeneratingFunction(param=param_hat, N=china_population, K=K, W=W, simulator=simulator)
 
-    llik = LogLikelihood(sim$y, sim$z, china_population, K, W, simulator)
-    p_hat = optim(log(params), llik, control=list(fnscale=-1, maxit=2000))
+    llik = LogLikelihood(y=sim$y, z=sim$z, N=china_population, K=K, W=W, sim_fun=simulator)
+    p_hat = optim(log(param_hat), llik, control=list(fnscale=-1, maxit=2000), visualise=TRUE)
     p_hat
   }
 
