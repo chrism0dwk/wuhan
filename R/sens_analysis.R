@@ -15,7 +15,7 @@ fit_model = function(alpha=1/4, K=NA, W=NA, init_loc='Wuhan', max_t=22) {
 
   simulator = NetworkODEModel(china_population, K, 'Wuhan', alpha, max_t)
   llik = LogLikelihood(china_cases[,1:max_t], world_cases[,1:max_t],china_population, K, W, simulator)
-  p_hat = optim(log(par_init_), llik, control=list(fnscale=-1, maxit=2000))
+  p_hat = optim(log(par_init_), llik, control=list(fnscale=-1, maxit=2000), visualise=TRUE)
   p_hat
 }
 
@@ -27,8 +27,11 @@ fit_model = function(alpha=1/4, K=NA, W=NA, init_loc='Wuhan', max_t=22) {
 #' @param W the flight connectivity matrix internationally
 #' @return a list of optim outputs and alphas
 #' @export
-alpha_sensitivity = function(alpha=c(3.6, 4.0, 4.4, 5.0, 6.0), K, W) {
-  res = lapply(alpha, function(a) fit_model(alpha=a, K=K, W=W))
-  res$alpha = alpha
+alpha_sensitivity = function(alpha=1/c(3.6, 4.0, 4.4, 5.0, 6.0), K, W) {
+  res = list()
+  for (i in 1:length(alpha)) {
+    res[[i]] = fit_model(alpha=alpha[i], K=K, W=W)
+  }
+  res$alpha=alpha
   res
 }
