@@ -49,8 +49,13 @@ NetworkODEModel = function(N, K, init_loc, alpha, max_t) {
 }
 
 
+<<<<<<< HEAD
 NoiseGeneratingFunction = function(param, N, K, W, phi_mask=rownames(K)=='Wuhan',
                                    agg_up_to = 11, max_t=22, r=2, simulator=None) {
+=======
+NoiseGeneratingFunction = function(param, N, K, W, phi_mask=(rownames(K)=='Wuhan'),
+                                   agg_up_to = 11, max_t=22, simulator=None) {
+>>>>>>> master
 
   expected = simulator(param[1:3])
   p_detect = rep(1, length(N))
@@ -60,12 +65,20 @@ NoiseGeneratingFunction = function(param, N, K, W, phi_mask=rownames(K)=='Wuhan'
   exp_incr = t(t(diff(expected$R)) * p_detect)
 
   # Noise for China
+<<<<<<< HEAD
   y_china = matrix(rnbinom(length(exp_incr), size=r, mu=unlist(exp_incr)), ncol=ncol(exp_incr))
+=======
+  y_china = matrix(rpois(length(exp_incr), unlist(exp_incr)), ncol=ncol(exp_incr))
+>>>>>>> master
 
   # Noise for RoW
   china_prev = t(t(expected$I / N) * p_detect)
   flight_prev = china_prev %*% W
+<<<<<<< HEAD
   y_row = matrix(rnbinom(length(flight_prev), size=r, mu=unlist(flight_prev)), ncol=ncol(flight_prev))
+=======
+  y_row = matrix(rpois(length(flight_prev), unlist(flight_prev)), ncol=ncol(flight_prev))
+>>>>>>> master
 
   list(y=t(y_china), z=t(y_row))
 }
