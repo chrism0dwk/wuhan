@@ -51,9 +51,11 @@ summary_samples = function(samples) {
 
   res = rbind(quantile_ci(beta),
               quantile_ci(gamma),
+              quantile_ci(1/gamma),
               quantile_ci(I0W),
-              quantile_ci(phi))
-  rownames(res) = names(samples)
+              quantile_ci(phi),
+              quantile_ci(beta/gamma))
+  rownames(res) = c('beta','gamma','lat_period','I0W','phi','R0')
   colnames(res) = c('2.5%','50%','97.5%')
   as.data.frame(res)
 }
