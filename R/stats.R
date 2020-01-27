@@ -7,7 +7,7 @@
 #' @param max_t time to simulate up to
 #' @return a data.frame of bootstrapped parameter samples
 #' @export
-bootstrap = function(param_hat, K, W, alpha, max_t) {
+bootstrap = function(param_hat, K, W, alpha, max_t, n_samples=10) {
 
   simulator = NetworkODEModel(china_population, K, 'Wuhan', alpha, max_t)
 
@@ -21,7 +21,7 @@ bootstrap = function(param_hat, K, W, alpha, max_t) {
 
   n_sim = 0
   samples = NULL
-  while(n_sim < 10) {
+  while(n_sim < n_samples) {
     fit = bs()
     if(fit$convergence == 0) {
       samples = rbind(samples, fit$par)
