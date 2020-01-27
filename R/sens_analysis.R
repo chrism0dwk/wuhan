@@ -15,7 +15,7 @@ fit_model = function(alpha=1/4, K=NA, W=NA, init_loc='Wuhan', max_t=22) {
 
   simulator = NetworkODEModel(china_population, K, 'Wuhan', alpha, max_t)
   llik = LogLikelihood(china_cases[,1:max_t], world_cases[,1:max_t],china_population, K, W, simulator)
-  p_hat = optim(log(par_init_), llik, control=list(fnscale=-1, maxit=2000), visualise=TRUE)
+  p_hat = optim(log(par_init_), llik, control=list(fnscale=-1, maxit=2000))
   p_hat
 }
 
