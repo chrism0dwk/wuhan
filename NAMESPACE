@@ -2,6 +2,9 @@
 
 export(LogLikelihood)
 export(NetworkODEModel)
+export(bootstrap)
 export(import_matrix)
+export(quantile_ci)
+export(summary_samples)
 import(assertthat)
 import(deSolve)
