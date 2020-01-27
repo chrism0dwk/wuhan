@@ -1,0 +1,74 @@
+---
+title: "Novel coronavirus 2019-nCov: early estimation of epidemiological parameters and epidemic predictions.<br>Supplementary Information."
+author: "Jonathan M Read, Jessica RE Bridgen, Derek AT Cummings, Antonia Ho, Chris P Jewell"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{wuhan-model}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Within China Model
+
+Let $y_{it}$ be the number of new case detections of 2019-nCoV in Chinese city $i=1,\dots,n$
+modelled as
+
+$$ y_{is} \sim \mbox{Poisson}(\phi_i x_{is})$$
+
+where $x_{it}$ is the expected number of new case detections in city $i$ on
+day $s$.  $0 \leq \phi_i \leq 1$ is a city-specific case ascertainment 
+probability.  In the case of China, we assume that
+
+$$ \phi_i = \begin{cases} \phi & \mbox{if } i = \mbox{`Wuhan'} \\ 1 & \mbox{otherwise} \end{cases}$$
+
+Within China, we model an individual's trajectory through infection as 
+susceptible, exposed (and not infectious), infected (and infectious), and finally
+removed.  In continuous time, let $S_{it}$, $E_{it}$, $I_{it}$, and $R_{it}$
+be the numbers of susceptible, exposed, infected, and removed individuals 
+respectively in city $i$ at time $t$.  We assume that
+$$ x_{is} = \int_{(s^+-1)}^{s+} R_{it} \mathrm{d}t $$
+where $s+$ denotes the right limit of day $s$.  That is, the number of newly
+recovered individuals occurring on day $s$.
+
+We model $S_{it}$, $E_{it}$, $I_{it}$, and $R_{it}$ using a set of ordinary differential equations
+
+\begin{eqnarray*}
+	\frac{\mathrm{d}\vec{S}_t}{\mathrm{d}t} & = & -\vec{S}_t \odot \vec{\lambda}_t \\
+	\frac{\mathrm{d}\vec{E}_t}{\mathrm{d}t} & = & \vec{S}_t \odot \vec{\lambda}_t - \alpha \vec{E}_t \\
+	\frac{\mathrm{d}\vec{I}_t}{\mathrm{d}t} & = & \alpha \vec{E}_t - \gamma \vec{I}_t \\
+	\frac{\mathrm{d}\vec{R}_t}{\mathrm{d}t} & = & \gamma \vec{I}_t
+\end{eqnarray*}
+where $\vec{S}_t = (S_{1t},\dots,S_{nt})^T$ and likewise for $\vec{E}_t$, $\vec{I}_t$, and $\vec{R}_t$.  Furthermore,
+$$ \vec{\lambda}_t = \beta \left(\vec{I}/\vec{N} + (K \cdot (\vec{I_t}/\vec{N}))/\vec{N}\right) $$
+the force of infection vector for each city in China.  $\beta$ is the human-human transmission rate, $K$ is a $n \times n$ matrix where the $k_{ij},\; i \ne j$ element is the mean daily number of passengers flying between city $i$ and $j$, with diagonal elements $k_{ii} = 1, \; i=1,\dots n$. $\vec{N}$ is a vector of length $n$ containing the population size of each city in China.   
+	
+
+# Non-China Country-level Model
+
+	
+Let the number of imported cases of 2019-nCoV in $m$ countries other than China be $z_js$ for $j=1,\dots,m$ where
+$$z_{jt} \sim \mbox{Poisson}(\nu_{jt})$$
+and
+$$\nu_{jt} = \frac{W_{j\cdot} (\vec{\phi}\odot\vec{I}_t)}{\vec{N}}$$
+where $W$ is a $m \times n$ matrix with $w_{ji}$th element being the mean daily number of passengers flying from Chinese city $i$ to non-Chinese city $j$.
+
+# Inference
+
+We perform parameter inference on $\vec{\theta} = (\beta, \phi, \gamma, I_{Wuhan,0})^T$ using Maximum Likelihood Estimation, with log likelihood function
+\begin{equation} \label{eq:lik}
+\ell \left(\vec{y}, \vec{z} ; \vec{\theta}\right) \propto \sum_{t=1}^{T} \left[ \sum_{i=1}^{n} \left\{ y_{it}\log(\phi_{i}x_{it}) -\phi_{i}\lambda_{it} \right\} + \sum_{j=1}^{m} \left\{z_{jt}\log\nu_{jt} - \nu_{jt}\right\} \right].
+\end{equation}
+
+In practice, our data present a cumulative case count beginning on 11th January 2020.  Since the likelihood in Equation \ref{eq:lik} assumes that number of new cases are available throughout the epidemic, we make the assumption that the number of cases reported on 11th January 2020 are the sum of Poisson-distributed independent draws on each day in the interval [0, 11].  We therefore modify our likelihood function as
+$$\ell \left(\vec{y}, \vec{z} ; \vec{\theta}\right) \propto y_{11t} \log(\phi_i \sum_{t=1}^{11} x_{it}) + \sum_{t=12}^{T} \left[ \sum_{i=1}^{n} \left\{ y_{it}\log(\phi_{i}x_{it}) -\phi_{i}\lambda_{it} \right\} + \sum_{j=1}^{m} \left\{z_{jt}\log\nu_{jt} - \nu_{jt}\right\} \right]. 
+$$
+
+Since the support of our parameters is bounded ($\beta, \gamma, I_{Wuhan,0} > 0,\; \phi > 0$), inference is made on the log scale using the standard Nelder-Mead optimisation routine implemented in R v3.6.1.  95\% confidence intervals are calculated assuming asymptotic Normality on the log-scale and transformed onto the linear scale for interpretation purposes.
+
