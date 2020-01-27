@@ -51,7 +51,7 @@ for the `phi` parameter), so needs to be transformed first:
 The samples can then be drawn by bootstrap, for which a computing cluster is
 highly recommended (thanks Lancaster University HEC facility!).
 ````r
-> samples = bootstrap(p_hat, K, W, alpha=1/4, max_t=22, n=1000)
+> samples = bootstrap(p_hat, K, W, alpha=1/4, max_t=22, n_samples=1000)
 ````
 
 Since the airline connectivity matrices are not included in this package, samples 
