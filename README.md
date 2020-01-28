@@ -32,10 +32,12 @@ To use the package, assume the following workflow in R:
 > simulator = NetworkODEModel(N=china_population, K=K, init_loc='Wuhan', alpha=1/4, max_t=22) 
 
 # Instantiate LogLikelihood function
-> llik = LogLikelihood(y=china_cases, z=world_cases, N=N, K=K, W=W, sim_fun=simulator)
+> llik = LogLikelihood(y=china_cases[,1:22], z=world_cases[,1:22], N=N, K=K, W=W, sim_fun=simulator)
 
 # Find MLEs using optimisation
-> p_hat = optim(log(par_init), llik, control=list(fnscale=-1))
+> par_init = c(0.4, 0.142857142857143, 1, 0.5)  # Starting point
+> fit = optim(log(par_init), llik, control=list(fnscale=-1))
+> p_hat = fit$par
 ````
 
 Asymptotic assumptions for confidence intervals fail in our case, since the
