@@ -34,7 +34,7 @@ __Data required__:
 __Parameters__:
 
 * `beta` the human-human basic transmission rate
-* `gamma` the infectious period
+* `gamma` the removal rate (inverse of infectious period)
 * `I0W` the number of initial infectives in Wuhan
 * `phi` the case ascertainment rate in Wuhan
     
@@ -65,7 +65,7 @@ for the `phi` parameter), so needs to be transformed first:
 
 ````r
 > p_hat[1:3] = exp(p_hat[1:3])
-> p_hat[4] = exp(p_hat[4])
+> p_hat[4] = invlogit(p_hat[4])
 ````
 
 The samples can then be drawn by bootstrap, for which a computing cluster is
