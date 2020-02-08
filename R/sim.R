@@ -1,28 +1,45 @@
 #' Network SEIR metapopulation model
 #'
 #' @param N the population sizes
-#' @param K a contact matrix
+#' @param K_early China early between-cities connectivity
+#' @param K_late China late between-cities connectivity
 #' @param init_loc the name of the initial location
 #' @param alpha the latent period
-#' @return list of matrices containing simulated results
+#' @param max_t the maximum time up to which to simulate
+#' @return function which runs a simulation, with signature function(param).  Param is a vector of \code{c(beta, delta, gamma, I0W)}
 #' @import deSolve
 #' @export
-NetworkODEModel = function(N, K, init_loc, alpha, max_t) {
+NetworkODEModel = function(N, K_early, K_late, init_loc, alpha, max_t, t_control=23) {
 
   n = length(N) # number of cities
 
-  func = function(t, y, parms) {
+  ode_fn = function(t, y, parms) {
+
     ymat = matrix(y, nrow=n, byrow=FALSE)
     S = ymat[,1]
     E = ymat[,2]
     I = ymat[,3]
     R = ymat[,4]
-    beta = parms[1]
-    gamma = parms[2]
 
-    lambda = beta * (I/N + (t(K/N)%*%I/N))
-    dS = -lambda * S
-    dE = lambda * S - alpha * E
+    init_idx = which(rownames(K_early)==init_loc)
+    K = K_early
+    beta_wuhan = parms[1] # Early
+
+    if (t >= t_control) {
+      K = K_late
+      beta_wuhan = parms[2]
+    }
+
+    # Within-city transmission vector
+    beta = rep(parms[3], n)
+    beta[init_idx] = beta_wuhan
+
+    # Removal rate
+    gamma = parms[4]
+
+    lambda = beta * (I + (t(K/N)%*%I))
+    dS = -lambda * S/N
+    dE = lambda * S/N - alpha * E
     dI = alpha * E - gamma * I
     dR = gamma * I
 
@@ -31,13 +48,14 @@ NetworkODEModel = function(N, K, init_loc, alpha, max_t) {
 
   t = 0:max_t
 
-
   simulate = function(param) {
-    I0W = param[3] # Initial infectives in Wuhan
+    # Params: c(beta_w_early, beta_w_late, beta_w_china, gamma, I0W)
+    I0W = param[5] # Initial infectives in Wuhan
+
     I0 = rep(0, length(N))
-    I0[rownames(K)==init_loc] = I0W
+    I0[rownames(K_early)==init_loc] = I0W
     y = c(N-I0, rep(0, length(N)), I0, rep(0, length(N)))
-    sim = deSolve::ode(y=y, times=t, func=func, parms=param)
+    sim = deSolve::ode(y=y, times=t, func=ode_fn, parms=param)
     t=sim[,1]
     S=sim[,seq(2,len=n)]
     E=sim[,seq(2+n, len=n)]
