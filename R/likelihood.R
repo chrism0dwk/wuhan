@@ -116,7 +116,7 @@ LogLikelihood = function(y, z, pop_info, K_early, K_late, W_early, W_late, sim_f
     llik[1] = sum(llik_china)
 
     # Early observations - Rest of world
-    china_prev = t(t(expected$I / N) * (1-p_detect))[-1,] # Omit starting value
+    china_prev = t(t(expected$I / N))[-1,] # Omit starting value
     flight_prev_early = china_prev[1:(t_agg-1),] %*% W_early
     llik[2] = sum(dpois(z[1:(t_agg-1),], flight_prev_early, log=TRUE))
 
