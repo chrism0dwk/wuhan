@@ -67,12 +67,13 @@ NetworkODEModel = function(N, K_early, K_late, init_loc, alpha, max_t, t_control
 }
 
 
-NoiseGeneratingFunction = function(param, N, K, W, phi_mask=(rownames(K)=='Wuhan'),
-                                   agg_up_to = 11, max_t=22, simulator=NA) {
+NoiseGeneratingFunction = function(param, N, W_early, W_late, phi_mask=(rownames(W_early)=='Wuhan'),
+                                   agg_up_to = 11, max_t=36, t_control=23,
+                                   simulator=NA) {
 
-  expected = simulator(param[1:3])
+  expected = simulator(param[1:5])
   p_detect = rep(1, length(N))
-  p_detect[phi_mask] = param[4]
+  p_detect[phi_mask] = param[6]
 
   # Increments on R
   exp_incr = t(t(diff(expected$R)) * p_detect)
@@ -80,9 +81,11 @@ NoiseGeneratingFunction = function(param, N, K, W, phi_mask=(rownames(K)=='Wuhan
   # Noise for China
   y_china = matrix(rpois(length(exp_incr), unlist(exp_incr)), ncol=ncol(exp_incr))
 
-  # Noise for RoW
+  # Noise for RoW -- Early
   china_prev = t(t(expected$I / N) * p_detect)
-  flight_prev = china_prev %*% W
+  flight_prev_early = china_prev[2:(t_control-1),] %*% W_early # omit day 0
+  flight_prev_late = china_prev[t_control:nrow(china_prev),] %*% W_late
+  flight_prev = rbind(flight_prev_early, flight_prev_late)
   y_row = matrix(rpois(length(flight_prev), unlist(flight_prev)), ncol=ncol(flight_prev))
 
   list(y=t(y_china), z=t(y_row))
