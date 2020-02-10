@@ -82,11 +82,11 @@ NoiseGeneratingFunction = function(param, N, W_early, W_late, phi_mask=(rownames
   y_china = matrix(rpois(length(exp_incr), unlist(exp_incr)), ncol=ncol(exp_incr))
 
   # Noise for RoW -- Early
-  china_prev = t(t(expected$I / N) * p_detect)
+  china_prev = expected$I / N
   flight_prev_early = china_prev[2:(t_control-1),] %*% W_early # omit day 0
   flight_prev_late = china_prev[t_control:nrow(china_prev),] %*% W_late
   flight_prev = rbind(flight_prev_early, flight_prev_late)
   y_row = matrix(rpois(length(flight_prev), unlist(flight_prev)), ncol=ncol(flight_prev))
 
-  list(y=t(y_china), z=t(y_row))
+  list(y=t(y_china), z=t(y_row), z_hat=t(flight_prev))
 }
