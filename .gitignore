@@ -1,0 +1,11 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+inst/doc
+doc
+Meta
+data/K_early.rda
+data/K_late.rda
+data/W_early.rda
+data/W_late.rda
