@@ -35,7 +35,7 @@ run_script = function()
     K_late/31,
     'Wuhan',
     alpha = 1 / 4,
-    max_t = 365 * 2,
+    max_t = 365,
     t_control = 23
   )
   sim = simulator_pred(params)
@@ -105,3 +105,32 @@ run_script = function()
                     control = list(fnscale = -1),
                     visualise = T)
 }
+
+
+extract_peak_time = function(sim, city) {
+  sim$t[which.max(sim$I[,city])]
+}
+
+plot_I_curves = function(sims) {
+
+  plot(as.Date('2020-01-01'),0, xlim=as.Date('2020-01-01')+c(0, 160), ylim=c(0, 8.5e5), type='n', ylab=expression(I(t)), xlab='Date', main='Wuhan')
+  sapply(sims, function(sim) lines(as.Date('2020-01-01')+sim$t, sim$I[,151], col=rgb(1, 0, 0, 0.1)))
+
+  plot(as.Date('2020-01-01'),0, xlim=as.Date('2020-01-01')+c(0, 160), ylim=c(0, 8.5e5), type='n', ylab=expression(I(t)), xlab='Date', main='Wuhan')
+  sapply(sims, function(sim) lines(as.Date('2020-01-01')+sim$t, sim$I[,151], col=rgb(1, 0, 0, 0.1)))
+}
+
+province_infec_curve = function(sims, prov='Hubei') {
+  w = as.data.frame(lapply(sims, function(sim) {
+    aggE = aggregate_by_province(sim$E, china_population$Province)
+    aggI = aggregate_by_province(sim$I, china_population$Province)
+    aggE[, prov] + aggI[, prov]
+  }))
+  t(apply(w, 1, function(x) c(mean(x), quantile(x, probs=c(0.025, 0.975)))))
+}
+
+china_infec_curve = function(sims) {
+  china = as.data.frame(lapply(sims, function(sim) rowSums(sim$I)+rowSums(sim$E)))
+  t(apply(china, 1, function(x) c(mean(x), quantile(x, probs=c(0.025, 0.975)))))
+}
+
