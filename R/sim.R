@@ -63,7 +63,7 @@ NoiseGeneratingFunction = function(param, N, K, W, phi_mask=(rownames(K)=='Wuhan
   y_china = matrix(rpois(length(exp_incr), unlist(exp_incr)), ncol=ncol(exp_incr))
 
   # Noise for RoW
-  china_prev = t(t(expected$I / N) * p_detect)
+  china_prev = expected$I / N
   flight_prev = china_prev %*% W
   y_row = matrix(rpois(length(flight_prev), unlist(flight_prev)), ncol=ncol(flight_prev))
 
