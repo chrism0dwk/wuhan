@@ -134,3 +134,15 @@ china_infec_curve = function(sims) {
   t(apply(china, 1, function(x) c(mean(x), quantile(x, probs=c(0.025, 0.975)))))
 }
 
+
+uk_predicted_imports = function(sim) {
+  china_prev = t(t(sim$I)/china_population$Population)
+
+  early = china_prev[1:22,] %*% (W_early[,'United.Kingdom']/31)
+  late = china_prev[23:nrow(china_prev),] %*% (W_late[,'United.Kingdom']/31)
+  uk_imports = rbind(early, late)
+}
+
+uk_imports_l = function(sims) {
+  sapply(sims, uk_predicted_imports)
+}
